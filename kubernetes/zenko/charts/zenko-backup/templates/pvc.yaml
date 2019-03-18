@@ -1,0 +1,39 @@
+{{- if .Values.backup.enabled -}}
+{{- if not .Values.backup.existingClaim -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ template "backup.fullname" . }}-pvc
+  annotations:
+    "helm.sh/resource-policy": keep
+  {{- if .Values.backup.annotations }}
+{{ toYaml .Values.backup.annotations | indent 4 }}
+  {{- end }}
+  labels:
+    app: {{ template "backup.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  accessModes:
+{{- range .Values.backup.accessModes }}
+    - {{ . | quote }}
+{{- end }}
+  resources:
+    requests:
+    {{- if .Values.backup.size }}
+      storage: {{ .Values.backup.size | quote }}
+    {{ else }}
+{{- $mongounit := trimAll "0123456789" (index .Values "mongodb-replicaSet" "persistentVolume" "size") }}
+{{- $mongosize := trimAll "GTMi" (index .Values "mongodb-replicaSet" "persistentVolume" "size") }}
+      storage: {{ div $mongosize 5 }}{{ $mongounit }}
+    {{ end }}
+{{- if .Values.backup.storageClass }}
+{{- if (eq "-" .Values.backup.storageClass) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.backup.storageClass }}"
+{{- end }}
+{{- end }}
+{{- end -}}
+{{- end -}}

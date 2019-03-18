@@ -1,0 +1,72 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "backup.fullname" . }}
+  labels:
+    app: {{ template "backup.name" . }}
+    chart: {{ template "backup.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "backup.name" . }}
+        release: {{ .Release.Name }}
+  
+  selector:
+    matchLabels:
+      app: {{ template "backup.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "backup.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      initContainers:
+        - name: {{ .Chart.Name }}-init
+          image: busybox
+          command: ['sh', '-x', '-c', 'if ! test -d /data/3511; then for i in `seq 1 3511`; do mkdir -p /data/$i; done; fi']
+          volumeMounts:
+            - name: {{ template "backup.fullname" . }}-pv
+              mountPath: /data
+
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.backup.image.repository }}:{{ .Values.backup.image.tag }}"
+          imagePullPolicy: {{ .Values.backup.image.pullPolicy }}
+          env:
+            - name: MONGODB_HOST
+              value: {{ template "backup.mongodb-hosts" . }}
+            - name: MONGODB_PORT
+              value: "27017"
+            - name: BACKUP_DATA_PATH
+              value: /data
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - name: {{ template "backup.fullname" . }}-pv
+              mountPath: /data
+          args: ['tail', '-f', '/dev/null']
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      volumes:
+        - name: {{ template "backup.fullname" . }}-pv
+          persistentVolumeClaim:
+            claimName: {{ if .Values.backup.existingClaim }}{{ .Values.backup.existingClaim }}{{- else }}{{ template "backup.fullname" . }}-pvc{{- end }}

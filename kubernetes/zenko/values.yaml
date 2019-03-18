@@ -66,6 +66,23 @@ maintenance:
       tag: 0.11.0.0
       pullPolicy: IfNotPresent
 
+backup:
+ # Enables the backup feature for Zenko. Metadata is backed up for MongoDB
+ # Per default schedule metadata backup takes place as full and incremental
+ # Fullbackup is taken every day and incremental backup is taken every
+ # 5 minutes
+  enabled: true
+  image:
+    repository: anurag4dsb/s3utils
+    tag: '0.0.2'
+    imagePullPolicy: IfNotPresent
+  accessModes:
+      - ReadWriteOnce
+  annotations: {}
+  existingClaim: ""
+  persistentVolume:
+    size: 10Gi
+
 cloudserver:
   replicaCount: *nodeCount
   replicaFactor: 10
@@ -129,7 +146,7 @@ cosmos:
       tag: 0.1.0
       pullPolicy: IfNotPresent
 
-    ## A namespace to watch can be specified otherwise will default to the 
+    ## A namespace to watch can be specified otherwise will default to the
     ## installed namespace
     # namespace: default
     schedule: "* */12 * * *"
