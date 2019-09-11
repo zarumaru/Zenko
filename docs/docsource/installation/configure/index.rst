@@ -23,4 +23,5 @@ access and manage these namespaces.
    configure_ingress
    set_up_S3C_for_OOB
    set_up_NFS_for_OOB
+   set_up_AWS_for_OOB
 

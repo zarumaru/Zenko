@@ -1,7 +1,7 @@
 Supported Clouds and Services
 =============================
 
-Zenko replicates and manages data from one or many sources to one or several
+Zenko replicates and manages data from one or many sources to one or many
 destinations. Sources can be clouds or services, and targets can be of several
 types of cloud backend.
 
@@ -41,6 +41,13 @@ metadata from servers using the following protocols:
   configuration process or from the command line. Because NFS does not maintain
   an object-store namespace, Zenko extrapolates one using out-of-band updates.
 
+* Amazon Web Services (AWS)
+
+  Zenko can ingest data and metadata from AWS sources, using a simple Orbit
+  configuration process or from the command line. Because AWS's object-store
+  namespace is not accessible to customers, Zenko queries Amazon buckets and
+  extrapolates its own namespace using out-of-band updates.
+
 Other sources are under development. 
 
 Supported Targets
@@ -65,5 +72,5 @@ private and public clouds:
    * Google Cloud Storage
    * Microsoft Azure Storage
 
-Zenko cannot write to non-object-store endpoints such as NFS at this
-time. Other target clouds and services are under development.
+Zenko cannot write to non-object-store endpoints such as NFS at this time. Other
+target clouds and services are under development.
