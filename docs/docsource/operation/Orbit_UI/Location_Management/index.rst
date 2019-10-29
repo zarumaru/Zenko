@@ -64,7 +64,7 @@ sproxyd presents a RING-native REST API providing direct object-store access to
 the RING. If you are integrating to a RING that does not have an S3 Connector
 installed, this is probably the API you use to access the RING.
 
-.. _Zenko\ Local:
+.. _Zenko Local:
 
 Zenko Local
 ___________
@@ -87,7 +87,7 @@ NFS Mount
 ---------
 
 Zenko can access information and file system metadata over the NFSv3 and NFSv4
-protocols.  To configure Zenko to access NFS using out-of-band updates, review
+protocols. To configure Zenko to access NFS using out-of-band updates, review
 the NFS host's /etc/exports file to find the relevant export path, hostname, and
 NFS options. Use ``nfsstat`` on the NFS host to discover the relevant NFS
 version and protocol.
@@ -100,8 +100,11 @@ version and protocol.
    scanning but before replication is complete. Changes written after the scan
    but before replication completes may not be replicated.
 
-ADD AWS INFORMATION HERE TO PARALLEL THE NFS MOUNT INFO?
+AWS Mount
+---------
 
+   ADD AWS INFORMATION HERE TO PARALLEL THE NFS MOUNT INFO
+   
 You can:
 
 .. toctree::
