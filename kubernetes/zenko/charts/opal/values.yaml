@@ -42,8 +42,13 @@ blobserver:
   replicaCount: 3
   replicaFactor: 1
 
-  # Time between async delete runs, in seconds
-  async_delete_frequency: '60'
+  async:
+    successfulJobsHistory: 1
+    deleteContainer:
+      maxRetry: 1
+      maxConcurrentProcs: 10
+      maxConcurrentDeletes: 100
+      schedule: "*/5 * * * *"
 
   image:
     repository: registry.scality.com/sf-eng/blobserver
@@ -87,6 +92,7 @@ blobserver:
       targetCPUUtilizationPercentage: 80
 
 jabba:
+  enabled: False
   endpoint: manage.zenko.local
   replicaCount: 3
   replicaFactor: 1

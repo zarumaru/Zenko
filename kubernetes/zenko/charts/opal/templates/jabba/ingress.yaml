@@ -1,3 +1,4 @@
+{{- if .Values.jabba.enabled -}}
 {{ if .Values.jabba.ingress.enabled -}}
 {{- $root := . -}}
 {{- $fullName := include "jabba.fullname" . -}}
@@ -37,4 +38,5 @@ spec:
               serviceName: {{ $fullName }}
               servicePort: http
   {{- end }}
+{{- end }}
 {{- end }}

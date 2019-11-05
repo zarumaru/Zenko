@@ -1,0 +1,44 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ template "opal.fullname" . }}-async-delete
+  labels:
+    app: {{ template "opal.name" . }}-async-delete
+    chart: {{ template "opal.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  schedule: "{{ .Values.blobserver.async.deleteContainer.schedule }}"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: {{ .Values.blobserver.async.successfulJobsHistory }}
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 120
+      template:
+        metadata:
+          labels:
+            app: {{ template "opal.name" . }}-async-delete
+            chart: {{ template "opal.chart" . }}-async-delete
+            release: {{ .Release.Name }}
+            heritage: {{ .Release.Service }}
+        spec:
+          restartPolicy: OnFailure
+          {{- if .Values.blobserver.image.imagePullSecret }}
+          imagePullSecrets:
+            - name: {{ .Values.blobserver.image.imagePullSecret }}
+          {{- end }}
+          containers:
+            - name: async-container-delete
+              image: "{{ .Values.blobserver.image.repository }}:{{ .Values.blobserver.image.tag }}"
+              imagePullPolicy: {{ .Values.blobserver.image.pullPolicy }}
+              command: ['yarn', 'cron:container_delete']
+          env:
+            {{- include "blobserver.env" . | indent 12 }}
+            - name: BLOB_MAX_RETRY
+              value: "{{ .Values.blobserver.async.deleteContainer.maxRetry }}"
+            - name: BLOB_CONCURRENT_OPS
+              value: "{{ .Values.blobserver.async.deleteContainer.maxConcurrentProcs }}"
+            - name: BLOB_CONCURRENT_DELETES
+              value: "{{ .Values.blobserver.async.deleteContainer.maxConcurrentDeletes }}"

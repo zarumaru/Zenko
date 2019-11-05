@@ -33,33 +33,6 @@ spec:
         - name: {{ .Values.blobserver.image.imagePullSecret }}
       {{- end }}
       containers:
-        - name: async-delete
-          image: "{{ .Values.blobserver.image.repository }}:{{ .Values.blobserver.image.tag }}"
-          imagePullPolicy: "{{ .Values.blobserver.image.pullPolicy }}"
-          terminationMessagePolicy: FallbackToLogsOnError
-          command:
-            - sh
-            - -c
-            - |
-                cd scripts
-                echo "Starting asyncdelete."
-                while sleep {{ default 60 .Values.blobserver.async_delete_frequency }}; do
-                  echo RUNNING...
-                  node asyncContainerDelete.js
-                done
-          env:
-            - name: BLOB_METADATA
-              value: mongodb
-            - name: BLOB_DATA
-              value: multiple
-            - name: BLOB_DATA_CLIENT_HOST
-              value: "{{ include "opal.s3-data-host" . }}"
-            - name: REMOTE_MANAGEMENT_DISABLE
-              value: "1"
-            - name: MONGODB_HOSTS
-              value: "{{ include "opal.mongodb-hosts" . }}"
-            - name: MONGODB_RS
-              value: "{{ default "rs0" .Values.mongodb.replicaSet }}"
         - name: blobserver
           image: "{{ .Values.blobserver.image.repository }}:{{ .Values.blobserver.image.tag }}"
           imagePullPolicy: {{ .Values.blobserver.image.pullPolicy }}
@@ -68,7 +41,7 @@ spec:
             - name: http
               containerPort: 8001
           env:
-  {{- include "blobserver.env" . | indent 12 }}
+            {{- include "blobserver.env" . | indent 12 }}
             {{- if .Values.global.orbit.enabled }}
             - name: MANAGEMENT_MODE
               value: "{{- .Values.global.orbit.workerMode -}}"
@@ -85,11 +58,11 @@ spec:
               port: http
               initialDelaySeconds: 15
               periodSeconds: 20
-          # readinessProbe:
-          #   httpGet:
-          #     path: /_/healthcheck/deep
-          #     port: http
-          startupPrgobe:
+          readinessProbe:
+            httpGet:
+              path: /_/healthcheck/deep
+              port: http
+          startupProbe:
             tcpSocket:
               port: http
             failureThreshold: 30
